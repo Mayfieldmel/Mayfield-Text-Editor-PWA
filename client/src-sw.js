@@ -1,5 +1,5 @@
 const { offlineFallback, warmStrategyCache } = require('workbox-recipes');
-const { CacheFirst } = require('workbox-strategies');
+const { CacheFirst, StaleWhileRevalidate } = require('workbox-strategies');
 const { registerRoute } = require('workbox-routing');
 const { CacheableResponsePlugin } = require('workbox-cacheable-response');
 const { ExpirationPlugin } = require('workbox-expiration');
@@ -29,7 +29,7 @@ registerRoute(({ request }) => request.mode === 'navigate', pageCache);
 // TODO: Implement asset caching
 // Register route for caching images
 // The cache first strategy is often the best choice for images because it saves bandwidth and improves performance.
-registerRoute(
+/*registerRoute(
   ({ request }) => request.destination === 'image',
   new CacheFirst({
     cacheName: 'my-image-cache',
@@ -43,4 +43,10 @@ registerRoute(
       }),
     ],
   })
+);
+*/ 
+
+registerRoute(
+  ({ request }) => ['style', 'script', 'worker'].includes(request.destination),
+   new StaleWhileRevalidate({ cacheName: 'asset-cache',  plugins: [new CacheableResponsePlugin({ statuses: [0, 200] })]})
 );
